@@ -430,3 +430,81 @@ As the {assistant_role}, to satisfy the new user's demand and make the software 
 ```
 
 ---
+
+## 7. Фазы тестирования
+
+Эти промты управляют процессом тестирования приложения и исправления обнаруженных ошибок.
+
+### 7.1. TestErrorSummary (Анализ ошибок тестирования)
+
+**Назначение:** Анализ отчетов о тестировании и локализация багов, которые вызывают проблемы.
+
+**Участники:** Programmer (assistant) ↔ Software Test Engineer (user)
+
+**Входные данные:**
+- `{language}` - язык программирования
+- `{codes}` - исходный код
+- `{test_reports}` - отчеты о тестировании с ошибками
+
+**Выход:** Краткое резюме обнаруженных багов с указанием их местоположения и причин
+
+**Процесс:**
+- Программист анализирует отчеты о тестировании
+- Локализует проблемы в коде
+- Формулирует краткое резюме для последующего исправления
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:179-190`
+
+```text
+Our developed source codes and corresponding test reports are listed below:
+Programming Language: "{language}"
+Source Codes:
+"{codes}"
+Test Reports of Source Codes:
+"{test_reports}"
+According to my test reports, please locate and summarize the bugs that cause the problem.
+```
+
+### 7.2. TestModification (Исправление ошибок по результатам тестирования)
+
+**Назначение:** Исправление кода на основе отчетов о тестировании и резюме ошибок для обеспечения стабильной работы.
+
+**Участники:** Programmer (assistant) ↔ Software Test Engineer (user)
+
+**Входные данные:**
+- `{language}` - язык программирования
+- `{codes}` - исходный код
+- `{test_reports}` - отчеты о тестировании
+- `{error_summary}` - резюме ошибок из TestErrorSummary
+
+**Выход:**
+- Исправленный код с устраненными проблемами
+- Или строка `<INFO> Finished` если багов не обнаружено
+
+**Процесс:** Выполняется в цикле (до 3 раз) вместе с TestErrorSummary до устранения всех ошибок.
+
+**Важно:** Запрещены неполные решения с TODO. Код должен быть полностью функциональным.
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:192-213`
+
+```text
+Our developed source codes and corresponding test reports are listed below:
+Programming Language: "{language}"
+Source Codes:
+"{codes}"
+Test Reports of Source Codes:
+"{test_reports}"
+Error Summary of Test Reports:
+"{error_summary}"
+Note that each file must strictly follow a markdown code block format, where the following tokens must be replaced such that "FILENAME" is the lowercase file name including the file extension, "LANGUAGE" in the programming language, "DOCSTRING" is a string literal specified in source code that is used to document a specific segment of code, and "CODE" is the original code:
+FILENAME
+```LANGUAGE
+'''
+DOCSTRING
+'''
+CODE
+```
+As the {assistant_role}, to satisfy the new user's demand and make the software execute smoothly and robustly, you should modify the codes based on the error summary. Now, use the format exemplified above and modify the problematic codes based on the error summary. Output the codes that you fixed based on the test reported and corresponding explanations (strictly follow the format defined above, including FILENAME, LANGUAGE, DOCSTRING and CODE; incomplete "TODO" codes are strictly prohibited). If no bugs are reported, please return only one line like "<INFO> Finished".
+```
+
+---
