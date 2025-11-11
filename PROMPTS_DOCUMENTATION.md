@@ -508,3 +508,109 @@ As the {assistant_role}, to satisfy the new user's demand and make the software 
 ```
 
 ---
+
+## 8. Фазы дизайна (Art Design)
+
+Эти промты управляют процессом создания и интеграции графических элементов в GUI приложения.
+
+### 8.1. ArtDesign (Дизайн графических элементов)
+
+**Назначение:** Определение функционально независимых графических элементов GUI, которые будут украшены изображениями.
+
+**Участники:** Programmer (assistant) ↔ Chief Creative Officer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{language}` - язык программирования
+- `{codes}` - исходный код приложения
+
+**Выход:** Список элементов GUI в формате `FILENAME.png: DESCRIPTION`
+
+**Процесс:**
+- Анализ GUI приложения
+- Выявление функционально независимых элементов
+- Определение графических элементов для декорирования
+
+**Пример выхода:**
+```
+button_1.png: The button with the number "1" on it.
+button_multiply.png: The button with the multiplication symbol ("*") on it.
+background.png: the background color to decorate the Go game
+```
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:58-83`
+
+```text
+Our developed source codes and corresponding test reports are listed below:
+Task: "{task}".
+Programming Language: "{language}"
+Source Codes:
+"{codes}"
+Note that each file must strictly follow a markdown code block format, where the following tokens must be replaced such that "FILENAME" is the lowercase file name including the file extension, "LANGUAGE" in the programming language, "DOCSTRING" is a string literal specified in source code that is used to document a specific segment of code, and "CODE" is the original code:
+FILENAME
+```LANGUAGE
+'''
+DOCSTRING
+'''
+CODE
+```
+As the {assistant_role}, to satisfy the new user's demand and equip the software with a beautiful graphical user interface (GUI), we will discuss and design many decorative images for GUI decoration. Now, we keep discussing the GUI beautification by listing some functionally independent elements in GUI that are being considered to be decorated by different pictures. For example, ten digits (0-9) in a calculator are functionally independent.
+To answer, use the format: " FILENAME.png: DESCRIPTION" where "FILENAME" is the filename of the image and "DESCRIPTION" denotes the detailed description of the independent elements. For example:
+'''
+button_1.png: The button with the number "1" on it.
+button_multiply.png: The button with the multiplication symbol ("*") on it.
+background.png: the background color to decorate the Go game
+'''
+Now, list all functionally independent elements as much as possible.
+```
+
+### 8.2. ArtIntegration (Интеграция графических элементов)
+
+**Назначение:** Интеграция созданных изображений в GUI приложения с правильным масштабированием и позиционированием.
+
+**Участники:** Programmer (assistant) ↔ Chief Creative Officer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{language}` - язык программирования
+- `{codes}` - исходный код
+- `{images}` - список готовых изображений с описаниями
+
+**Выход:** Обновленный исходный код с интегрированными графическими элементами
+
+**Технические требования:**
+- Изображения имеют фиксированный размер 256x256 пикселей
+- Требуется динамическое масштабирование под размер GUI
+- Использовать `self.*` для избежания проблем с автоматической сборкой мусора
+
+**Пример кода:**
+```python
+self.image = ImageTk.PhotoImage(Image.open("./image.png").resize((50, 50)))
+```
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:85-109`
+
+```text
+Our developed source codes and corresponding test reports are listed below:
+Task: "{task}".
+Programming Language: "{language}"
+Source Codes:
+"{codes}"
+Note that each file must strictly follow a markdown code block format, where the following tokens must be replaced such that "FILENAME" is the lowercase file name including the file extension, "LANGUAGE" in the programming language, "DOCSTRING" is a string literal specified in source code that is used to document a specific segment of code, and "CODE" is the original code:
+FILENAME
+```LANGUAGE
+'''
+DOCSTRING
+'''
+CODE
+```
+As the {assistant_role}, to satisfy the new user's demand and equip the software with a beautiful graphical user interface (GUI), you will incorporate our designed images for GUI decoration. Here are some ready-made high-quality pictures and corresponding descriptions:
+{images}
+Note that the designed images have a fixed size of 256x256 pixels and the images are located in the same directory as all the Python files; please dynamically scaling these images according to the size of GUI, and use "self.*" to avoid displaying-related problems caused by automatic garbage collection. For example:
+```
+self.image = ImageTk.PhotoImage(Image.open("./image.png").resize((50, 50)))
+```
+Now, use some or all of the pictures into the GUI to make it more beautiful and creative. Output codes strictly following the required format mentioned above.
+```
+
+---
