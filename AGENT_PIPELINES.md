@@ -135,3 +135,129 @@ ChatDev поддерживает два типа фаз:
 **Условие выхода:** Если любая фаза в Composition возвращает `<INFO> Finished`, цикл прерывается.
 
 ---
+
+## Основной пайплайн разработки (Default)
+
+Это стандартная цепочка фаз для полного цикла разработки ПО от анализа требований до финальной документации.
+
+**Источник конфигурации:** `CompanyConfig/Default/ChatChainConfig.json`
+
+### Полная схема пайплайна:
+
+```
+START (User Task Input)
+  │
+  ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 1. DemandAnalysis (SimplePhase)                             │
+│    CPO ↔ CEO: определяют модальность продукта               │
+│    Вход: {task}                                              │
+│    Выход: modality → ChatEnv                                 │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. LanguageChoose (SimplePhase)                             │
+│    CTO ↔ CEO: выбирают язык программирования                │
+│    Вход: {task}, {modality}, {ideas}                        │
+│    Выход: language → ChatEnv                                 │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 3. Coding (SimplePhase)                                     │
+│    Programmer ↔ CTO: создают исходный код                   │
+│    Вход: {task}, {modality}, {language}, {ideas}            │
+│    Выход: codes → ChatEnv                                    │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 4. CodeCompleteAll (ComposedPhase, cycleNum=10)            │
+│    ┌────────────────────────────────────────────┐           │
+│    │ 4.1 CodeComplete (SimplePhase)              │           │
+│    │     Programmer ↔ CTO: завершают классы      │           │
+│    │     Вход: {codes}, {unimplemented_file}     │           │
+│    │     Выход: обновленный codes → ChatEnv       │           │
+│    └────────────────────────────────────────────┘           │
+│    [Цикл до 10 раз, пока все классы не завершены]           │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 5. CodeReview (ComposedPhase, cycleNum=3)                  │
+│    ┌────────────────────────────────────────────┐           │
+│    │ 5.1 CodeReviewComment (SimplePhase)         │           │
+│    │     Code Reviewer ↔ Programmer              │           │
+│    │     Вход: {codes}, {task}, {modality}       │           │
+│    │     Выход: comments → ChatEnv                │           │
+│    │             ▼                                │           │
+│    │ 5.2 CodeReviewModification (SimplePhase)    │           │
+│    │     Programmer ↔ Code Reviewer              │           │
+│    │     Вход: {codes}, {comments}               │           │
+│    │     Выход: исправленный codes → ChatEnv      │           │
+│    └────────────────────────────────────────────┘           │
+│    [Цикл до 3 раз, пока код не идеален]                     │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 6. Test (ComposedPhase, cycleNum=3)                        │
+│    ┌────────────────────────────────────────────┐           │
+│    │ 6.1 TestErrorSummary (SimplePhase)          │           │
+│    │     Programmer ↔ Test Engineer              │           │
+│    │     Вход: {codes}, {test_reports}           │           │
+│    │     Выход: error_summary → ChatEnv           │           │
+│    │             ▼                                │           │
+│    │ 6.2 TestModification (SimplePhase)          │           │
+│    │     Programmer ↔ Test Engineer              │           │
+│    │     Вход: {codes}, {error_summary}          │           │
+│    │     Выход: исправленный codes → ChatEnv      │           │
+│    └────────────────────────────────────────────┘           │
+│    [Цикл до 3 раз, пока все тесты не проходят]              │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 7. EnvironmentDoc (SimplePhase)                            │
+│    Programmer ↔ CTO: создают requirements.txt               │
+│    Вход: {codes}, {task}                                    │
+│    Выход: requirements → ChatEnv                             │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 8. Manual (SimplePhase)                                     │
+│    CPO ↔ CEO: создают руководство пользователя             │
+│    Вход: {codes}, {requirements}, {task}                    │
+│    Выход: manual.md → файловая система                       │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+                     END
+              (Готовый проект)
+```
+
+### Поток данных по фазам:
+
+| Фаза | Вход (из ChatEnv) | Выход (в ChatEnv) | Промт | Роли |
+|------|------------------|------------------|-------|------|
+| **DemandAnalysis** | task | modality | Выбор формы продукта | CPO ↔ CEO |
+| **LanguageChoose** | task, modality, ideas | language | Выбор языка | CTO ↔ CEO |
+| **Coding** | task, modality, language, ideas | codes | Создание кода | Programmer ↔ CTO |
+| **CodeComplete** | codes, unimplemented_file | обновленный codes | Завершение классов | Programmer ↔ CTO |
+| **CodeReviewComment** | codes, task, modality | comments | Проверка кода | Code Reviewer ↔ Programmer |
+| **CodeReviewModification** | codes, comments | исправленный codes | Исправление по ревью | Programmer ↔ Code Reviewer |
+| **TestErrorSummary** | codes, test_reports | error_summary | Анализ ошибок | Programmer ↔ Test Engineer |
+| **TestModification** | codes, error_summary | исправленный codes | Исправление ошибок | Programmer ↔ Test Engineer |
+| **EnvironmentDoc** | codes, task | requirements | requirements.txt | Programmer ↔ CTO |
+| **Manual** | codes, requirements, task | manual.md | Руководство | CPO ↔ CEO |
+
+### Особенности пайплайна:
+
+1. **Итеративная разработка:** Фазы CodeReview и Test выполняются в циклах до достижения качества
+2. **Накопление контекста:** Каждая фаза обогащает ChatEnv новыми данными
+3. **Условный выход:** ComposedPhase завершаются при получении `<INFO> Finished`
+4. **Последовательность:** Фазы строго упорядочены - следующая зависит от результатов предыдущей
+
+---
