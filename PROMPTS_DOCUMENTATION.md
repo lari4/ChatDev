@@ -336,3 +336,97 @@ As the {assistant_role}, to satisfy the complete function of our developed softw
 ```
 
 ---
+
+## 6. Фазы проверки качества (Code Review)
+
+Эти промты управляют процессом проверки кода на качество, ошибки и соответствие требованиям.
+
+### 6.1. CodeReviewComment (Комментарии по код-ревью)
+
+**Назначение:** Проверка кода по строгому чек-листу из 6 критериев и предоставление комментариев для улучшения.
+
+**Участники:** Code Reviewer (assistant) ↔ Programmer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{modality}` - модальность продукта
+- `{language}` - язык программирования
+- `{ideas}` - креативные идеи
+- `{codes}` - текущий исходный код
+
+**Выход:**
+- Комментарий с наивысшим приоритетом и инструкции по исправлению
+- Или строка `<INFO> Finished` если код идеален
+
+**Критерии проверки:**
+1. Все используемые классы импортированы
+2. Все методы реализованы (нет заглушек)
+3. Все методы имеют необходимые комментарии
+4. Нет потенциальных багов
+5. Проект соответствует задаче пользователя
+6. Логика кода корректна, пользователь может взаимодействовать без потери функционала
+
+**Процесс:** Выполняется в цикле (до 3 раз) вместе с CodeReviewModification до достижения качественного кода.
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:134-153`
+
+```text
+According to the new user's task and our software designs:
+Task: "{task}".
+Modality: "{modality}".
+Programming Language: "{language}"
+Ideas: "{ideas}"
+Codes:
+"{codes}"
+As the {assistant_role}, to make the software directly operable without further coding, ChatDev have formulated the following regulations:
+1) all referenced classes should be imported;
+2) all methods should be implemented;
+3) all methods need to have the necessary comments;
+4) no potential bugs;
+5) The entire project conforms to the tasks proposed by the user;
+6) most importantly, do not only check the errors in the code, but also the logic of code. Make sure that user can interact with generated software without losing any feature in the requirement;
+Now, you should check the above regulations one by one and review the codes in detail, propose one comment with the highest priority about the codes, and give me instructions on how to fix. Tell me your comment with the highest priority and corresponding suggestions on revision. If the codes are perfect and you have no comment on them, return only one line like "<INFO> Finished".
+```
+
+### 6.2. CodeReviewModification (Исправление по результатам ревью)
+
+**Назначение:** Внесение исправлений в код на основе комментариев, полученных от Code Reviewer.
+
+**Участники:** Programmer (assistant) ↔ Code Reviewer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{modality}` - модальность продукта
+- `{language}` - язык программирования
+- `{ideas}` - креативные идеи
+- `{codes}` - текущий исходный код
+- `{comments}` - комментарии от Code Reviewer
+
+**Выход:** Полный исправленный код всех файлов с устраненными проблемами
+
+**Процесс:** Программист анализирует комментарии и вносит соответствующие изменения, обеспечивая креативность, исполняемость и надежность кода.
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:155-177`
+
+```text
+According to the new user's task, our designed product modality, languages and ideas, our developed first-edition source codes are listed below:
+Task: "{task}".
+Modality: "{modality}".
+Programming Language: "{language}"
+Ideas: "{ideas}"
+Codes:
+"{codes}"
+Comments on Codes:
+"{comments}"
+In the software, each file must strictly follow a markdown code block format, where the following tokens must be replaced such that "FILENAME" is the lowercase file name including the file extension, "LANGUAGE" in the programming language, "DOCSTRING" is a string literal specified in source code that is used to document a specific segment of code, and "CODE" is the original code. Format:
+FILENAME
+```LANGUAGE
+'''
+DOCSTRING
+'''
+CODE
+```
+As the {assistant_role}, to satisfy the new user's demand and make the software creative, executive and robust, you should modify corresponding codes according to the comments. Then, output the full and complete codes with all bugs fixed based on the comments. Return all codes strictly following the required format.
+```
+
+---
