@@ -187,3 +187,61 @@ To complete the task, you must write a response that appropriately solves the re
 ```
 
 ---
+
+## 4. Фазы анализа и планирования
+
+Эти промты используются на начальных этапах разработки для определения требований и технологического стека.
+
+### 4.1. DemandAnalysis (Анализ требований)
+
+**Назначение:** Определяет модальность продукта - в какой форме будет представлен результат (приложение, сайт, документ, презентация и т.д.).
+
+**Участники:** Chief Product Officer (assistant) ↔ Chief Executive Officer (user)
+
+**Процесс:** Агенты обсуждают различные варианты представления продукта и приходят к единому решению.
+
+**Выход:** Строка в формате `<INFO> [Modality]`, например `<INFO> Application`
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:2-18`
+
+```text
+ChatDev has made products in the following form before:
+Image: can present information in line chart, bar chart, flow chart, cloud chart, Gantt chart, etc.
+Document: can present information via .docx files.
+PowerPoint: can present information via .pptx files.
+Excel: can present information via .xlsx files.
+PDF: can present information via .pdf files.
+Website: can present personal resume, tutorial, products, or ideas, via .html files.
+Application: can implement visualized game, software, tool, etc, via python.
+Dashboard: can display a panel visualizing real-time information.
+Mind Map: can represent ideas, with related concepts arranged around a core concept.
+As the {assistant_role}, to satisfy the new user's demand and the product should be realizable, you should keep discussing with me to decide which product modality do we want the product to be?
+Note that we must ONLY discuss the product modality and do not discuss anything else! Once we all have expressed our opinion(s) and agree with the results of the discussion unanimously, any of us must actively terminate the discussion by replying with only one line, which starts with a single word <INFO>, followed by our final product modality without any other words, e.g., "<INFO> PowerPoint".
+```
+
+### 4.2. LanguageChoose (Выбор языка программирования)
+
+**Назначение:** Определяет язык программирования, который будет использоваться для реализации проекта.
+
+**Участники:** Chief Technology Officer (assistant) ↔ Chief Executive Officer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{modality}` - модальность продукта из предыдущей фазы
+- `{ideas}` - креативные идеи для реализации
+
+**Выход:** Строка в формате `<INFO> [Language]`, например `<INFO> Python`
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:20-31`
+
+```text
+According to the new user's task and some creative brainstorm ideas listed below:
+Task: "{task}".
+Modality: "{modality}".
+Ideas: "{ideas}".
+We have decided to complete the task through a executable software implemented via a programming language.
+As the {assistant_role}, to satisfy the new user's demand and make the software realizable, you should propose a concrete programming language. If python can complete this task via Python, please answer Python; otherwise, answer another programming language (e.g., Java, C++, etc,).
+Note that we must ONLY discuss the target programming language and do not discuss anything else! Once we all have expressed our opinion(s) and agree with the results of the discussion unanimously, any of us must actively terminate the discussion and conclude the best programming language we have discussed without any other words or reasons, return only one line using the format: "<INFO> *" where "*" represents a programming language.
+```
+
+---
