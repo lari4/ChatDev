@@ -245,3 +245,94 @@ Note that we must ONLY discuss the target programming language and do not discus
 ```
 
 ---
+
+## 5. Фазы разработки кода
+
+Эти промты управляют процессом создания исходного кода приложения.
+
+### 5.1. Coding (Основная разработка кода)
+
+**Назначение:** Создание полного исходного кода приложения на основе требований пользователя и принятых технических решений.
+
+**Участники:** Programmer (assistant) ↔ Chief Technology Officer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{description}` - описание задачи
+- `{modality}` - модальность продукта
+- `{language}` - выбранный язык программирования
+- `{ideas}` - креативные идеи
+- `{gui}` - флаг необходимости GUI
+
+**Выход:** Полный исходный код всех файлов проекта в markdown формате
+
+**Особенности:**
+- Код должен быть полностью функциональным
+- Запрещены заглушки (placeholders) типа `pass` в Python
+- Требуется пошаговое планирование архитектуры
+- Начинается с main файла, затем импортированные модули
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:33-56`
+
+```text
+According to the new user's task and our software designs listed below:
+Task: "{task}".
+Task description: "{description}".
+Modality: "{modality}".
+Programming Language: "{language}"
+Ideas:"{ideas}"
+We have decided to complete the task through a executable software with multiple files implemented via {language}. As the {assistant_role}, to satisfy the new user's demands, you should write one or multiple files and make sure that every detail of the architecture is, in the end, implemented as code. {gui}
+Think step by step and reason yourself to the right decisions to make sure we get it right.
+You will first lay out the names of the core classes, functions, methods that will be necessary, as well as a quick comment on their purpose.
+Then you will output the content of each file including complete code. Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that "FILENAME" is the lowercase file name including the file extension, "LANGUAGE" in the programming language, "DOCSTRING" is a string literal specified in source code that is used to document a specific segment of code, and "CODE" is the original code:
+FILENAME
+```LANGUAGE
+'''
+DOCSTRING
+'''
+CODE
+```
+You will start with the "main" file, then go to the ones that are imported by that file, and so on.
+Please note that the code should be fully functional. Ensure to implement all functions. No placeholders (such as 'pass' in Python).
+```
+
+### 5.2. CodeComplete (Завершение незаконченного кода)
+
+**Назначение:** Завершение реализации незаконченных классов и методов, которые остались с заглушками после первичной разработки.
+
+**Участники:** Programmer (assistant) ↔ Chief Technology Officer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{modality}` - модальность продукта
+- `{language}` - язык программирования
+- `{codes}` - текущий исходный код
+- `{unimplemented_file}` - файл с незавершенной реализацией
+
+**Выход:** Полностью реализованный код файла с завершенными методами
+
+**Процесс:** Эта фаза выполняется в цикле (до 10 раз в ComposedPhase) до тех пор, пока все классы и методы не будут полностью реализованы.
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:111-132`
+
+```text
+According to the new user's task and our software designs listed below:
+Task: "{task}".
+Modality: "{modality}".
+Programming Language: "{language}"
+Codes:
+"{codes}"
+Unimplemented File:
+"{unimplemented_file}"
+In our software, each file must strictly follow a markdown code block format, where the following tokens must be replaced such that "FILENAME" is the lowercase file name including the file extension, "LANGUAGE" in the programming language, "DOCSTRING" is a string literal specified in source code that is used to document a specific segment of code, and "CODE" is the original code:
+FILENAME
+```LANGUAGE
+'''
+DOCSTRING
+'''
+CODE
+```
+As the {assistant_role}, to satisfy the complete function of our developed software, you have to implement all methods in the {unimplemented_file} file which contains a unimplemented class. Now, implement all methods of the {unimplemented_file} and all other codes needed, then output the fully implemented codes, strictly following the required format.
+```
+
+---
