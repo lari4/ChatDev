@@ -614,3 +614,134 @@ Now, use some or all of the pictures into the GUI to make it more beautiful and 
 ```
 
 ---
+
+## 9. Фазы документации
+
+Эти промты управляют созданием технической и пользовательской документации для проекта.
+
+### 9.1. EnvironmentDoc (Документация зависимостей)
+
+**Назначение:** Создание файла `requirements.txt` со всеми зависимостями проекта для корректной установки окружения.
+
+**Участники:** Programmer (assistant) ↔ Chief Technology Officer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{modality}` - модальность продукта
+- `{language}` - язык программирования
+- `{ideas}` - креативные идеи
+- `{codes}` - полный исходный код проекта
+
+**Выход:** Файл `requirements.txt` со списком всех необходимых библиотек и их версий
+
+**Формат вывода:**
+```
+numpy==1.19.2
+pandas>=1.1.4
+```
+
+**Процесс:**
+- Анализ импортов в коде
+- Определение всех используемых библиотек
+- Формирование requirements.txt с версиями
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:215-233`
+
+```text
+The new user's task and our developed codes are listed:
+Task: "{task}".
+Modality: "{modality}".
+Programming Language: "{language}"
+Ideas: "{ideas}"
+Codes:
+"{codes}"
+As the {assistant_role}, you should write a requirements.txt file, which is commonly used in Python projects to specify the dependencies or packages required for the project to run properly. It serves as a way to document and manage the project's dependencies in a standardized format. For example:
+requirements.txt
+```
+numpy==1.19.2
+pandas>=1.1.4
+```
+According to the codes and file format listed above, write a requirements.txt file to specify the dependencies or packages required for the project to run properly.
+```
+
+### 9.2. Manual (Руководство пользователя)
+
+**Назначение:** Создание подробного руководства пользователя (`manual.md`) с описанием функций, установки и использования приложения.
+
+**Участники:** Chief Product Officer (assistant) ↔ Chief Executive Officer (user)
+
+**Входные данные:**
+- `{task}` - задача пользователя
+- `{modality}` - модальность продукта
+- `{language}` - язык программирования
+- `{ideas}` - креативные идеи
+- `{codes}` - исходный код
+- `{requirements}` - зависимости из EnvironmentDoc
+
+**Выход:** Файл `manual.md` в формате Markdown с полным руководством пользователя
+
+**Содержание руководства:**
+- Описание основных функций приложения
+- Инструкции по установке зависимостей
+- Руководство по использованию/запуску
+
+**Формат:** Markdown с разделами, примерами команд и пояснениями
+
+**Источник:** `CompanyConfig/Default/PhaseConfig.json:235-276`
+
+```text
+The new user's task, our developed codes and required dependencies are listed:
+Task: "{task}".
+Modality: "{modality}".
+Programming Language: "{language}"
+Ideas: "{ideas}"
+Codes:
+"{codes}"
+Requirements:
+"{requirements}"
+As the {assistant_role}, by using Markdown, you should write a manual.md file which is a detailed user manual to use the software, including introducing main functions of the software, how to install environment dependencies and how to use/play it. For example:
+manual.md
+```
+# LangChain
+Building applications with LLMs through composability
+Looking for the JS/TS version? Check out LangChain.js.
+**Production Support:** As you move your LangChains into production, we'd love to offer more comprehensive support.
+Please fill out this form and we'll set up a dedicated support Slack channel.
+## Quick Install
+`pip install langchain`
+or
+`conda install langchain -c conda-forge`
+## 🤔 What is this?
+Large language models (LLMs) are emerging as a transformative technology, enabling developers to build applications that they previously could not. However, using these LLMs in isolation is often insufficient for creating a truly powerful app - the real power comes when you can combine them with other sources of computation or knowledge.
+This library aims to assist in the development of those types of applications. Common examples of these applications include:
+**❓ Question Answering over specific documents**
+- Documentation
+- End-to-end Example: Question Answering over Notion Database
+**🤖 Agents**
+- Documentation
+- End-to-end Example: GPT+WolframAlpha
+## 📖 Documentation
+Please see [here](https://python.langchain.com) for full documentation on:
+- Getting started (installation, setting up the environment, simple examples)
+- How-To examples (demos, integrations, helper functions)
+- Reference (full API docs)
+- Resources (high-level explanation of core concepts)
+```
+```
+
+---
+
+## Заключение
+
+Эта документация содержит все AI промты, используемые в системе ChatDev. Промты организованы в четкую иерархию:
+
+- **Роли** определяют личность и компетенции агентов
+- **Фазы** определяют конкретные задачи в процессе разработки
+- **Плейсхолдеры** позволяют динамически подставлять контекст
+
+Все промты работают вместе для создания полноценного пайплайна разработки ПО от анализа требований до финальной документации.
+
+**Исходные файлы:**
+- `CompanyConfig/Default/RoleConfig.json` - роли агентов
+- `CompanyConfig/Default/PhaseConfig.json` - фазы разработки
+- `CompanyConfig/Default/ChatChainConfig.json` - конфигурация цепочки выполнения
